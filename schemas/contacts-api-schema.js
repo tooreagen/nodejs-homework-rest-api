@@ -20,6 +20,4 @@ const contactSchema = joi.object({
     .required(),
 });
 
-module.exports = {
-  contactSchema,
-};
+module.exports = contactSchema;
