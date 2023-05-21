@@ -36,4 +36,4 @@ async function dbConnect() {
 
 dbConnect();
 
-module.exports = Contact;
+module.exports = { Contact };

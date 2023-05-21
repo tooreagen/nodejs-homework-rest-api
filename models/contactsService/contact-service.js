@@ -1,5 +1,5 @@
 const { nanoid } = require("nanoid");
-const Contact = require("../../server");
+const { Contact } = require("../../server");
 
 const writeContacts = async (contacts) => {
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
