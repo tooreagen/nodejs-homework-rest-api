@@ -3,6 +3,25 @@ const mongoose = require("mongoose");
 
 const { DB_HOST } = process.env;
 
+const contactSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "Set name for contact"],
+  },
+  email: {
+    type: String,
+  },
+  phone: {
+    type: String,
+  },
+  favorite: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const contactsModel = mongoose.model("contacts", contactSchema);
+
 async function dbConnect() {
   try {
     await mongoose.connect(DB_HOST);
@@ -16,3 +35,5 @@ async function dbConnect() {
 }
 
 dbConnect();
+
+module.exports = contactsModel;
