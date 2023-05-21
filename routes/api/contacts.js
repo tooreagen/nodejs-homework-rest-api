@@ -25,6 +25,7 @@ const contactSchema = joi.object({
     .message("<phone> length from 10 to 20, may contain digits, spaces, () + -")
     .required(),
 });
+
 router.get("/", async (req, res, next) => {
   try {
     const contacts = await contactsService.listContacts();
