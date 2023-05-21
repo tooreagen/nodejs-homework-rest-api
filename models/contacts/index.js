@@ -1,12 +1,12 @@
 const { nanoid } = require("nanoid");
-const contactsModel = require("../../server");
+const Contact = require("../../server");
 
 const writeContacts = async (contacts) => {
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 };
 
 const listContacts = async () => {
-  const contacts = await contactsModel.find();
+  const contacts = await Contact.find();
   return JSON.parse(contacts);
 };
 

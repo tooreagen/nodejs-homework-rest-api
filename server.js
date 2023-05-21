@@ -20,7 +20,7 @@ const contactSchema = new mongoose.Schema({
   },
 });
 
-const contactsModel = mongoose.model("contacts", contactSchema);
+const Contact = mongoose.model("contacts", contactSchema);
 
 async function dbConnect() {
   try {
@@ -36,4 +36,4 @@ async function dbConnect() {
 
 dbConnect();
 
-module.exports = contactsModel;
+module.exports = Contact;
