@@ -18,6 +18,8 @@ const contactSchema = joi.object({
     .pattern(new RegExp(`^[0-9\s()+ -]{10,20}$`))
     .message("<phone> length from 10 to 20, may contain digits, spaces, () + -")
     .required(),
+  favorite: joi
+    .boolean()
 });
 
 module.exports = contactSchema;
