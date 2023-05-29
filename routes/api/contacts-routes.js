@@ -1,7 +1,7 @@
 const express = require("express");
 const contactsController = require("../../controllers/contacts-controller");
 const router = express.Router();
-const contactSchema = require("../../schemas/contacts-api-schema");
+const contactSchema = require("../../schemas/contact-api-schema");
 const { validateBody } = require("../../decorators/validateBody");
 
 router.get("/", contactsController.listContacts);
