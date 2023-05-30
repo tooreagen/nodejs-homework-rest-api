@@ -1,6 +1,5 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { HttpError } = require("../helpers");
 const userService = require("../models/user-service");
 const { ctrlWrapper } = require("../decorators/ctrlWrapper");
 
@@ -24,12 +23,42 @@ const userRegister = async (req, res) => {
     const user = await userService.userRegister(newUser);
     res
       .status(201)
-      .json({ user: { email: user.email, subscription: user.subscription }});
+      .json({ user: { email: user.email, subscription: user.subscription } });
   } catch (error) {
     return next(error);
   }
 };
 
+async function userLogin(req, res, next) {
+  const { email, password } = req.body;
+
+  try {
+    const userExist = await userService.userFind(email);
+
+    if (userExist === null) {
+      return res.status(401).json({ message: "Email or password is wrong" });
+    }
+    const isMatch = await bcrypt.compare(password, userExist.password);
+
+    if (isMatch === false) {
+      return res.status(401).json({ message: "Email or password is wrong" });
+    }
+
+    const payload = { id: userExist.id };
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1d" });
+
+    await userService.userTokenUpdate(userExist.id, token);
+
+    res.json({
+      token: token,
+      user: { email: userExist.email, subscription: userExist.subscription },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   userRegister: ctrlWrapper(userRegister),
+  userLogin: ctrlWrapper(userLogin),
 };
