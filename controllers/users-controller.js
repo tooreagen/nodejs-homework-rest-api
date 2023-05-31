@@ -73,8 +73,33 @@ const userLogout = async (req, res, next) => {
   }
 };
 
+const userCurrent = async (req, res, next) => {
+  const { authorization = "" } = req.headers;
+  const [bearer, token] = authorization.split(" ");
+
+  if (bearer !== "Bearer" || !token) {
+    next(HttpError(401));
+  }
+
+  try {
+    const user = await userService.userFindByToken(token);
+
+    if (!user) {
+      next(HttpError(401));
+    }
+
+    res.json({
+      email: user.email,
+      subscription: user.subscription,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   userRegister: ctrlWrapper(userRegister),
   userLogin: ctrlWrapper(userLogin),
   userLogout: ctrlWrapper(userLogout),
+  userCurrent: ctrlWrapper(userCurrent),
 };

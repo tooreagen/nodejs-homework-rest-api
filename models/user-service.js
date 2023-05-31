@@ -16,9 +16,14 @@ const userTokenUpdate = async (userId, token) => {
   return await User.findByIdAndUpdate(userId, { token: token });
 };
 
+const userFindByToken = async (token) => {
+  return await User.findOne({ token: token });
+};
+
 module.exports = {
   userRegister,
   userFind,
   userTokenUpdate,
   userFindById,
+  userFindByToken,
 };
