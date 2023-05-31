@@ -6,6 +6,8 @@ const { validateBody } = require("../../decorators/validateBody");
 
 router.get("/", contactsController.listContacts);
 
+router.get("/paginate", contactsController.paginateContacts);
+
 router.get("/:contactId", contactsController.getContactById);
 
 router.post("/", validateBody(contactSchema), contactsController.addContact);

@@ -48,6 +48,23 @@ const updateStatusContact = async (req, res) => {
   res.json(contact);
 };
 
+const paginateContacts = async (req, res, next) => {
+  const { page = 1, limit = 10 } = req.query;
+
+  try {
+    const contacts = await contactsService.paginationContacts(page, limit);
+    const countContacts = await (await contactsService.listContacts()).length;
+
+    res.json({
+      contacts,
+      totalPages: Math.ceil(countContacts / limit),
+      currentPage: page,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   listContacts: ctrlWrapper(listContacts),
   getContactById: ctrlWrapper(getContactById),
@@ -55,4 +72,5 @@ module.exports = {
   removeContact: ctrlWrapper(removeContact),
   updateContact: ctrlWrapper(updateContact),
   updateStatusContact: ctrlWrapper(updateStatusContact),
+  paginateContacts: ctrlWrapper(paginateContacts),
 };
