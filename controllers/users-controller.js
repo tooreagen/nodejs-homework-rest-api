@@ -5,7 +5,7 @@ const { ctrlWrapper } = require("../decorators/ctrlWrapper");
 
 const { SECRET_KEY } = process.env;
 
-const userRegister = async (req, res) => {
+const userRegister = async (req, res, next) => {
   const { email, password } = req.body;
   const newUser = {
     email: email,
@@ -29,7 +29,7 @@ const userRegister = async (req, res) => {
   }
 };
 
-async function userLogin(req, res, next) {
+const userLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -56,9 +56,25 @@ async function userLogin(req, res, next) {
   } catch (error) {
     return next(error);
   }
-}
+};
+
+const userLogout = async (req, res, next) => {
+  try {
+    const user = await userService.userFindById(req.user.id);
+
+    if (!user) {
+      next(HttpError(401));
+    }
+
+    await userService.userTokenUpdate(req.user.id, null);
+    res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+};
 
 module.exports = {
   userRegister: ctrlWrapper(userRegister),
   userLogin: ctrlWrapper(userLogin),
+  userLogout: ctrlWrapper(userLogout),
 };
