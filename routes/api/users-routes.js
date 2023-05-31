@@ -30,4 +30,10 @@ router.get(
   usersController.userCurrent
 );
 
+router.patch(
+  "/",
+  authorization,
+  usersController.userSubscriptionUpdate
+);
+
 module.exports = router;

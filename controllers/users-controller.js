@@ -47,7 +47,7 @@ const userLogin = async (req, res, next) => {
     const payload = { id: userExist.id };
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1d" });
 
-    await userService.userTokenUpdate(userExist.id, token);
+    await userService.userUpdate(userExist.id, { token: token });
 
     res.json({
       token: token,
@@ -66,7 +66,7 @@ const userLogout = async (req, res, next) => {
       next(HttpError(401));
     }
 
-    await userService.userTokenUpdate(req.user.id, null);
+    await userService.userUpdate(req.user.id, { token: null });
     res.status(204).send();
   } catch (error) {
     return next(error);
@@ -97,9 +97,28 @@ const userCurrent = async (req, res, next) => {
   }
 };
 
+const userSubscriptionUpdate = async (req, res, next) => {
+  const { subscription } = req.body;
+
+  try {
+    const user = await userService.userUpdate(req.user.id, {
+      subscription: subscription,
+    });
+
+    if (!user) {
+      next(HttpError(401));
+    }
+
+    res.json(user);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   userRegister: ctrlWrapper(userRegister),
   userLogin: ctrlWrapper(userLogin),
   userLogout: ctrlWrapper(userLogout),
   userCurrent: ctrlWrapper(userCurrent),
+  userSubscriptionUpdate: ctrlWrapper(userSubscriptionUpdate),
 };

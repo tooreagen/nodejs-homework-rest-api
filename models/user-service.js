@@ -12,8 +12,8 @@ const userFindById = async (id) => {
   return await User.findById(id);
 };
 
-const userTokenUpdate = async (userId, token) => {
-  return await User.findByIdAndUpdate(userId, { token: token });
+const userUpdate = async (id, query) => {
+  return await User.findByIdAndUpdate(id, query, { new: true });
 };
 
 const userFindByToken = async (token) => {
@@ -23,7 +23,7 @@ const userFindByToken = async (token) => {
 module.exports = {
   userRegister,
   userFind,
-  userTokenUpdate,
+  userUpdate,
   userFindById,
   userFindByToken,
 };
