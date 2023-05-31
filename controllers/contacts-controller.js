@@ -3,6 +3,13 @@ const contactsService = require("../models/contact-service");
 const { ctrlWrapper } = require("../decorators/ctrlWrapper");
 
 const listContacts = async (req, res) => {
+  const { favorite } = req.query;
+
+  if (favorite === "true") {
+    const contacts = await contactsService.listContacts({ favorite: true });
+    res.json(contacts);
+  }
+
   const contacts = await contactsService.listContacts();
   res.json(contacts);
 };
