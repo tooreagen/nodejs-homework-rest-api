@@ -1,7 +1,7 @@
-const { Contact } = require("../../schemas/contact-db-schema");
+const { Contact } = require("../schemas/contact-db-schema");
 
-const listContacts = async () => {
-  return await Contact.find();
+const listContacts = async (query = {}) => {
+  return await Contact.find(query);
 };
 
 const getContactById = async (contactId) => {
@@ -24,6 +24,13 @@ const updateStatusContact = async (contactId, body) => {
   return await Contact.findByIdAndUpdate(contactId, body, { new: true });
 };
 
+const paginationContacts = async (page, limit) => {
+  return await Contact.find()
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .exec();
+};
+
 module.exports = {
   listContacts,
   getContactById,
@@ -31,4 +38,5 @@ module.exports = {
   addContact,
   updateContact,
   updateStatusContact,
+  paginationContacts,
 };

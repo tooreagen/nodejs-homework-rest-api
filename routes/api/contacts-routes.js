@@ -1,10 +1,15 @@
 const express = require("express");
 const contactsController = require("../../controllers/contacts-controller");
 const router = express.Router();
-const contactSchema = require("../../schemas/contacts-api-schema");
+const contactSchema = require("../../schemas/contact-api-schema");
 const { validateBody } = require("../../decorators/validateBody");
+const authorization = require("../../middlewares/authorization");
+
+router.use(authorization);
 
 router.get("/", contactsController.listContacts);
+
+router.get("/paginate", contactsController.paginateContacts);
 
 router.get("/:contactId", contactsController.getContactById);
 
