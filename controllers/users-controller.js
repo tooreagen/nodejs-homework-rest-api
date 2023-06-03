@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
 const userService = require("../models/user-service");
 const { ctrlWrapper } = require("../decorators/ctrlWrapper");
 
@@ -20,6 +21,8 @@ const userRegister = async (req, res, next) => {
     }
 
     newUser.password = await bcrypt.hash(password, 10);
+    newUser.avatarURL = gravatar.url(email, { s: '200' });
+
     const user = await userService.userRegister(newUser);
     res
       .status(201)
