@@ -3,6 +3,7 @@ const usersController = require("../../controllers/users-controller");
 const userApiSchema = require("../../schemas/user-api-schema");
 const { validateBody } = require("../../decorators/validateBody");
 const authorization = require("../../middlewares/authorization")
+const upload = require("../../middlewares/upload");
 
 const router = express.Router();
 
@@ -34,6 +35,13 @@ router.patch(
   "/",
   authorization,
   usersController.userSubscriptionUpdate
+);
+
+router.patch(
+  "/avatars",
+  authorization,
+  upload.single("avatar"),
+  usersController.userAvatarUpdate
 );
 
 module.exports = router;

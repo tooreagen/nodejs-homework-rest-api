@@ -1,8 +1,12 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
+const path = require("path");
+const jimp = require("jimp");
+const fs = require("fs").promises;
 const userService = require("../models/user-service");
 const { ctrlWrapper } = require("../decorators/ctrlWrapper");
+const userAvatarDelete = require("../helpers/userAvatarDelete");
 
 const { SECRET_KEY } = process.env;
 
@@ -21,7 +25,7 @@ const userRegister = async (req, res, next) => {
     }
 
     newUser.password = await bcrypt.hash(password, 10);
-    newUser.avatarURL = gravatar.url(email, { s: '200' });
+    newUser.avatarURL = gravatar.url(email, { s: "200" });
 
     const user = await userService.userRegister(newUser);
     res
@@ -118,10 +122,48 @@ const userSubscriptionUpdate = async (req, res, next) => {
   }
 };
 
+const userAvatarUpdate = async (req, res, next) => {
+  const userId = req.user.id;
+  const { path: oldFilePath, originalname } = req.file;
+  const avatarsFolderPath = path.resolve("public", "avatars");
+  const newFilePath = path.join(avatarsFolderPath, `${userId}_${originalname}`);
+  const avatarURL = path.join("avatars", `${userId}_${originalname}`);
+
+  try {
+    userAvatarDelete(userId, avatarsFolderPath);
+
+    await jimp
+      .read(oldFilePath)
+      .then((avatar) => {
+        return avatar.resize(250, 250).write(newFilePath);
+      })
+      .catch((error) => {
+        throw error;
+      });
+
+    await userService.userUpdate(userId, {
+      avatarURL: avatarURL,
+    });
+
+    fs.unlink(oldFilePath, (error) => {
+      if (error) {
+        throw error;
+      }
+    });
+
+    res.json({
+      avatarURL: avatarURL,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   userRegister: ctrlWrapper(userRegister),
   userLogin: ctrlWrapper(userLogin),
   userLogout: ctrlWrapper(userLogout),
   userCurrent: ctrlWrapper(userCurrent),
   userSubscriptionUpdate: ctrlWrapper(userSubscriptionUpdate),
+  userAvatarUpdate: ctrlWrapper(userAvatarUpdate),
 };
