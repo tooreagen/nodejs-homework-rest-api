@@ -7,14 +7,29 @@ const fs = require("fs").promises;
 const userService = require("../models/user-service");
 const { ctrlWrapper } = require("../decorators/ctrlWrapper");
 const userAvatarDelete = require("../helpers/userAvatarDelete");
+const { nanoid } = require("nanoid");
+const { mailSend } = require("../helpers/mailSend");
+const {
+  htmlEmailVerification,
+} = require("../htmlTemplate/htmlEmailVerification");
+const { HttpError } = require("../helpers");
 
-const { SECRET_KEY } = process.env;
+const { SECRET_KEY, MAIL_SENDER } = process.env;
 
 const userRegister = async (req, res, next) => {
   const { email, password } = req.body;
+  const verificationToken = nanoid();
+
   const newUser = {
     email: email,
     password: password,
+  };
+
+  const mailData = {
+    from: MAIL_SENDER,
+    to: email,
+    subject: "E-mail verification Contacts service",
+    html: htmlEmailVerification(verificationToken),
   };
 
   try {
@@ -26,8 +41,12 @@ const userRegister = async (req, res, next) => {
 
     newUser.password = await bcrypt.hash(password, 10);
     newUser.avatarURL = gravatar.url(email, { s: "200" });
+    newUser.verificationToken = verificationToken;
 
     const user = await userService.userRegister(newUser);
+
+    await mailSend(mailData);
+
     res
       .status(201)
       .json({ user: { email: user.email, subscription: user.subscription } });
@@ -49,6 +68,10 @@ const userLogin = async (req, res, next) => {
 
     if (isMatchPassword === false) {
       return res.status(401).json({ message: "Email or password is wrong" });
+    }
+
+    if (userExist.verify === false) {
+      return res.status(401).json({ message: "User not verified" });
     }
 
     const payload = { id: userExist.id };
@@ -159,6 +182,61 @@ const userAvatarUpdate = async (req, res, next) => {
   }
 };
 
+const userVerification = async (req, res, next) => {
+  const { verificationToken } = req.params;
+
+  try {
+    const user = await userService.userFindVerificationToken({
+      verificationToken: verificationToken,
+    });
+
+    if (!user) {
+      return next(HttpError(404, "User not found"));
+    }
+
+    await userService.userUpdate(user.id, {
+      verificationToken: null,
+      verify: true,
+    });
+    res.status(200).json({ message: "Verification successful" });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const userEmailResend = async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+      return next(HttpError(400, "Missing required field email"));
+  }
+
+  try {
+    const user = await userService.userFind(email);
+
+    if (!user) {
+      return next(HttpError(404, "User not found"));
+    }
+
+    if (user.verify === true) {
+      return next(HttpError(400, "Verification has already been passed"));
+    }
+
+    const mailData = {
+      from: MAIL_SENDER,
+      to: email,
+      subject: "E-mail verification Contacts service",
+      html: htmlEmailVerification(user.verificationToken),
+    };
+
+    await mailSend(mailData);
+
+    res.status(200).json({ message: "Verification email sent" });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   userRegister: ctrlWrapper(userRegister),
   userLogin: ctrlWrapper(userLogin),
@@ -166,4 +244,6 @@ module.exports = {
   userCurrent: ctrlWrapper(userCurrent),
   userSubscriptionUpdate: ctrlWrapper(userSubscriptionUpdate),
   userAvatarUpdate: ctrlWrapper(userAvatarUpdate),
+  userVerification: ctrlWrapper(userVerification),
+  userEmailResend: ctrlWrapper(userEmailResend),
 };
