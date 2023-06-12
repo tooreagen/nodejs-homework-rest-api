@@ -17,4 +17,12 @@ const userApiSchema = joi.object({
     .required(),
 });
 
-module.exports = userApiSchema;
+const userEmailSchema = joi.object({
+  email: joi
+    .string()
+    .email()
+    .message("<email> E-mail should be in the format email@domain.name")
+    .required(),
+});
+
+module.exports = {userApiSchema, userEmailSchema};

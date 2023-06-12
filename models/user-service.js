@@ -20,10 +20,15 @@ const userFindByToken = async (token) => {
   return await User.findOne({ token: token });
 };
 
+const userFindVerificationToken = async (findObj) => {
+  return await User.findOne(findObj);
+};
+
 module.exports = {
   userRegister,
   userFind,
   userUpdate,
   userFindById,
   userFindByToken,
+  userFindVerificationToken,
 };

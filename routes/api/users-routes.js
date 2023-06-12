@@ -1,6 +1,6 @@
 const express = require("express");
 const usersController = require("../../controllers/users-controller");
-const userApiSchema = require("../../schemas/user-api-schema");
+const {userApiSchema, userEmailSchema} = require("../../schemas/user-api-schema");
 const { validateBody } = require("../../decorators/validateBody");
 const authorization = require("../../middlewares/authorization")
 const upload = require("../../middlewares/upload");
@@ -44,4 +44,14 @@ router.patch(
   usersController.userAvatarUpdate
 );
 
+router.get(
+  "/verify/:verificationToken",
+  usersController.userVerification
+);
+
+router.post(
+  "/verify",
+  validateBody(userEmailSchema),
+  usersController.userEmailResend
+);
 module.exports = router;
